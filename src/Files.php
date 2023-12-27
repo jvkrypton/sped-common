@@ -2,6 +2,8 @@
 
 namespace NFePHP\Common;
 
+use Illuminate\Support\Facades\File;
+
 /**
  * Controla operações com arquivos
  *
@@ -23,8 +25,8 @@ class Files
      */
     public function __construct(string $folder)
     {
-        if (!is_dir($folder)) {
-            if (!mkdir($folder, 0777, true)) {
+        if (!File::isDirectory($folder)) {
+            if (!File::makeDirectory($folder, 0755, true, true)) {
                 throw new \Exception("Falhou ao tentar criar o path {$folder} (verifique as permissões de escrita).");
             }
         }
@@ -48,9 +50,9 @@ class Files
             for ($x = 0; $x < (count($par) - 1); $x++) {
                 $dir .= $par[$x] . "/";
             }
-            if (!is_dir($this->path . $dir)) {
+            if (!File::isDirectory($this->path . $dir)) {
                 $path = $this->path . $dir;
-                if (!mkdir($path, 0777, true)) {
+                if (!File::makeDirectory($path, 0755, true, true)) {
                     throw new \Exception("Falhou ao tentar criar o path {$path} (verifique as permissões de escrita).");
                 }
             }
@@ -73,7 +75,7 @@ class Files
             if (unlink($filename) === false) {
                 throw new \Exception("Falhou ao tentar deletar o arquivo {$filename}.");
             }
-        } elseif (is_file($this->path . DIRECTORY_SEPARATOR . $filename)) {
+        } elseif (File::isFile($this->path . DIRECTORY_SEPARATOR . $filename)) {
             if (unlink($this->path . DIRECTORY_SEPARATOR . $filename) === false) {
                 throw new \Exception("Falhou ao tentar deletar o arquivo {$filename}.");
             }
@@ -89,7 +91,7 @@ class Files
     public function listContents(string $folder = '')
     {
         $new = [];
-        if (is_dir($this->path . DIRECTORY_SEPARATOR . $folder)) {
+        if (File::isDirectory($this->path . DIRECTORY_SEPARATOR . $folder)) {
             if (empty($folder)) {
                 $list = glob($this->path . "*.*");
             } else {
@@ -125,11 +127,11 @@ class Files
      */
     public function has(string $path)
     {
-        if (is_dir($path)) {
+        if (File::isDirectory($path)) {
             return true;
-        } elseif (is_file($path)) {
+        } elseif (File::isFile($path)) {
             return true;
-        } elseif (is_file($this->path . DIRECTORY_SEPARATOR . $path)) {
+        } elseif (File::isFile($this->path . DIRECTORY_SEPARATOR . $path)) {
             return true;
         }
         return false;
